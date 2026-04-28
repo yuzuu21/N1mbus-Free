@@ -1,0 +1,28 @@
+# Nimbus Protective License (NPL) v1.0
+
+Copyright (c) 2026 Nimbus Team. All rights reserved.
+
+## 1. Overview
+This license governs the use, modification, and distribution of the "Nimbus" software (the "Software"). By using, downloading, or accessing the Software, you agree to be bound by the terms of this license.
+
+## 2. Permitted Use
+You are granted a non-exclusive, non-commercial right to use the Software for personal purposes only.
+
+## 3. Mandatory Attribution
+The name "Nimbus Team" and the original source links must be clearly displayed in any environment where the Software or its derivatives are used. The original LICENSE file must be included in all copies or substantial portions of the Software.
+
+## 4. Restrictions on Redistribution
+- **Standalone Redistribution Prohibited**: You may not redistribute the Software (specifically the JAR file) as a standalone product.
+- **Non-Commercial Use**: You may not sell, lease, or monetize the Software, its source code, or any derivative works in any way. This includes, but is not limited to, paywalling features or using the Software for paid services.
+
+## 5. Forking and Derivative Works Clause
+By forking, modifying, or creating derivative works of this Software, you hereby grant the original authors (Nimbus Team) an irrevocable, perpetual, worldwide, royalty-free, and non-exclusive license to use, copy, modify, and incorporate any and all of your changes or additions back into the original Software without further notice or compensation.
+
+## 6. Reverse Engineering
+Reverse engineering, decompiling, or disassembling the Software for the purpose of creating a competing product or bypassing license checks is strictly prohibited.
+
+## 7. Termination
+This license terminates automatically if you fail to comply with any of its terms. Upon termination, you must cease all use of the Software and destroy all copies in your possession.
+
+## 8. Disclaimer of Warranty
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

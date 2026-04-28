@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Nimbus Ghost UI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0c0e12;
+            --accent: #539eff;
+            --accent-glow: rgba(83, 158, 255, 0.2);
+            --text: #f0f4f8;
+            --text-muted: #8a94a6;
+            --font-main: 'Rubik', sans-serif;
+        }
+        * { box-sizing: border-box; user-select: none; }
+        
+        html, body { 
+            margin: 0; padding: 0; 
+            width: 100%; height: 100%; 
+            overflow: hidden;
+            background: transparent;
+            font-family: var(--font-main);
+            color: var(--text);
+        }
+
+        .panel {
+            position: absolute;
+            width: 220px;
+            min-width: 170px;
+            background: linear-gradient(135deg, rgba(26, 35, 50, 0.95) 0%, rgba(12, 14, 18, 0.98) 100%);
+            border-radius: 4px;
+            border: 1px solid rgba(83, 158, 255, 0.2);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+            resize: horizontal;
+        }
+
+        .header {
+            padding: 20px 24px 12px;
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: 2px;
+            color: #fff;
+            cursor: grab;
+            border-bottom: 1px solid rgba(83, 158, 255, 0.1);
+        }
+
+        .modules-container {
+            display: grid;
+            grid-template-rows: 1fr;
+            transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .modules-container.closed { grid-template-rows: 0fr; }
+        .modules { overflow: hidden; padding: 5px 0; }
+        .module-wrap { position: relative; }
+
+        .module {
+            padding: 10px 24px;
+            font-size: 14px;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .module:hover { color: var(--text); background: rgba(255, 255, 255, 0.03); padding-left: 28px; }
+        .module.active { color: var(--accent); font-weight: 500; text-shadow: 0 0 8px var(--accent-glow); }
+
+        .module-controls { display: flex; align-items: center; gap: 6px; }
+        .module-bind { 
+            font-size: 9px; color: var(--text-muted); padding: 2px 6px; 
+            background: rgba(255,255,255,0.05); border-radius: 3px; 
+            border: 1px solid rgba(255,255,255,0.1); cursor: pointer;
+            min-width: 28px; text-align: center; letter-spacing: 0.5px;
+            transition: all 0.2s;
+        }
+        .module-bind:hover { border-color: var(--accent); color: var(--text); background: rgba(83,158,255,0.1); }
+        .module-bind.binding { background: var(--accent); color: #fff; border-color: var(--accent); animation: pulse 1s infinite; }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .settings-container {
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(0, 0, 0, 0.15);
+        }
+        .settings-container.open { grid-template-rows: 1fr; }
+        .settings { overflow: hidden; }
+
+        .setting-item {
+            padding: 8px 24px;
+            font-size: 12px;
+            color: var(--text-muted);
+            border-top: 1px solid rgba(255,255,255,0.02);
+        }
+
+        .toggle-mini { width: 14px; height: 14px; border: 1px solid rgba(83, 158, 255, 0.3); border-radius: 2px; position: relative; }
+        .toggle-mini.active { background: var(--accent); border-color: var(--accent); }
+        .toggle-mini.active::after { content: '✓'; position: absolute; top: -2px; left: 2px; color: #fff; font-size: 10px; }
+
+        .mode-selector { display: flex; background: rgba(0,0,0,0.2); border-radius: 4px; padding: 2px; gap: 2px; margin-top: 5px; flex-wrap: wrap; }
+        .mode-btn { flex: 1; padding: 5px; text-align: center; font-size: 10px; cursor: pointer; border-radius: 3px; min-width: 40px; }
+        .mode-btn.active { background: var(--accent); color: #fff; }
+
+        input[type=range] {
+            -webkit-appearance: none; width: 100%; height: 3px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 8px;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 10px; height: 10px; background: #fff; border-radius: 50%; cursor: pointer; border: 2px solid var(--accent);
+        }
+
+        .bind-btn {
+            background: rgba(83, 158, 255, 0.1);
+            border: 1px solid rgba(83, 158, 255, 0.3);
+            border-radius: 3px;
+            padding: 2px 8px;
+            font-size: 10px;
+            min-width: 40px;
+            text-align: center;
+            color: var(--accent);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .bind-btn:hover { background: rgba(83, 158, 255, 0.2); }
+        .bind-btn.binding { background: var(--accent); color: #fff; animation: pulse 1s infinite; }
+
+        .ui-switch-btn {
+            position: fixed; bottom: 20px; right: 20px; padding: 10px 20px; background: rgba(12, 14, 18, 0.9);
+            border: 1px solid var(--accent); border-radius: 4px; font-size: 11px; cursor: pointer; backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body>
+<div id="container"></div>
+<div class="ui-switch-btn" onclick="post({action:'switchToNative'})">Switch to Native UI</div>
+
+<script>
+document.addEventListener('contextmenu', e => e.preventDefault());
+const post = (data) => { if (window.chrome && window.chrome.webview) window.chrome.webview.postMessage(JSON.stringify(data)); };
+
+// *** CRITICAL: Declare bindingTarget BEFORE updateGui uses it ***
+let bindingTarget = null;
+
+let lastJson = "";
+let currentZoom = 1.0;
+const PANEL_STATE_KEY = "nimbus_panel_state_v2";
+const MODULE_OPEN_STATE_KEY = "nimbus_module_open_state_v2";
+let panelStateCache = null;
+let moduleOpenStateCache = null;
+let lockLayoutScale = false;
+let activePanelDrag = null;
+
+// ─── Browser keyCode → GLFW keyCode mapping ─────────────────
+function browserKeyToGlfw(e) {
+    // Letters A-Z: browser=65-90, GLFW=65-90 (same!)
+    // Digits 0-9: browser=48-57, GLFW=48-57 (same!)
+    const map = {
+        'F1':290,'F2':291,'F3':292,'F4':293,'F5':294,'F6':295,
+        'F7':296,'F8':297,'F9':298,'F10':299,'F11':300,'F12':301,
+        'Escape':256, 'Enter':257, 'Tab':258, 'Backspace':259,
+        'Insert':260, 'Delete':261,
+        'ArrowRight':262, 'ArrowLeft':263, 'ArrowDown':264, 'ArrowUp':265,
+        'PageUp':266, 'PageDown':267, 'Home':268, 'End':269,
+        'CapsLock':280, 'ScrollLock':281, 'NumLock':282, 'PrintScreen':283, 'Pause':284,
+        'ShiftLeft':340, 'ShiftRight':344,
+        'ControlLeft':341, 'ControlRight':345,
+        'AltLeft':342, 'AltRight':346,
+        ' ':32, 'Space':32,
+    };
+    if (map[e.key]) return map[e.key];
+    if (map[e.code]) return map[e.code];
+    // For standard printable chars, keyCode matches GLFW
+    if (e.keyCode >= 65 && e.keyCode <= 90) return e.keyCode; // A-Z
+    if (e.keyCode >= 48 && e.keyCode <= 57) return e.keyCode; // 0-9
+    return e.keyCode; // Fallback
+}
+
+function loadPanelStateMap() {
+    if (panelStateCache) return panelStateCache;
+    try { panelStateCache = JSON.parse(localStorage.getItem(PANEL_STATE_KEY) || "{}"); }
+    catch (_) { panelStateCache = {}; }
+    return panelStateCache;
+}
+function savePanelStateMap(map) {
+    panelStateCache = map;
+    try { localStorage.setItem(PANEL_STATE_KEY, JSON.stringify(map)); } catch (_) {}
+}
+function saveSinglePanelState(title, panelEl) {
+    lockLayoutScale = true;
+    const map = loadPanelStateMap();
+    const mc = panelEl.querySelector('.modules-container');
+    map[title] = {
+        left: panelEl.style.left || "0px",
+        top: panelEl.style.top || "0px",
+        width: panelEl.style.width || (panelEl.offsetWidth + "px"),
+        closed: !!mc?.classList.contains('closed')
+    };
+    savePanelStateMap(map);
+    post({ action:'savePanelState', title, x:parseInt(map[title].left)||0, y:parseInt(map[title].top)||0, width:map[title].width, closed:map[title].closed });
+}
+
+function loadModuleOpenStateMap() {
+    if (moduleOpenStateCache) return moduleOpenStateCache;
+    try { moduleOpenStateCache = JSON.parse(localStorage.getItem(MODULE_OPEN_STATE_KEY) || "{}"); }
+    catch (_) { moduleOpenStateCache = {}; }
+    return moduleOpenStateCache;
+}
+function saveModuleOpenStateMap(map) {
+    moduleOpenStateCache = map;
+    try { localStorage.setItem(MODULE_OPEN_STATE_KEY, JSON.stringify(map)); } catch (_) {}
+}
+function setModuleOpenState(panelTitle, moduleName, isOpen) {
+    const map = loadModuleOpenStateMap();
+    map[`${panelTitle}::${moduleName}`] = !!isOpen;
+    saveModuleOpenStateMap(map);
+    post({ action:'saveModuleOpenState', title:panelTitle, module:moduleName, open:!!isOpen });
+}
+function getModuleOpenStateInfo(panelTitle, moduleName) {
+    const map = loadModuleOpenStateMap();
+    const key = `${panelTitle}::${moduleName}`;
+    const has = Object.prototype.hasOwnProperty.call(map, key);
+    return { has, value: has ? !!map[key] : false };
+}
+
+function toggleModuleSettings(panelTitle, moduleName, headerEl) {
+    const sc = headerEl.nextElementSibling;
+    if (!sc) return;
+    const nextOpen = !sc.classList.contains('open');
+    sc.classList.toggle('open');
+    setModuleOpenState(panelTitle, moduleName, nextOpen);
+}
+
+function ensureGlobalDragHandlers() {
+    if (window.__nimbusDragHandlersInstalled) return;
+    window.__nimbusDragHandlersInstalled = true;
+    document.addEventListener("mousemove", (e) => {
+        if (!activePanelDrag || !activePanelDrag.el) return;
+        activePanelDrag.el.style.left = (e.clientX - activePanelDrag.ox) + "px";
+        activePanelDrag.el.style.top = (e.clientY - activePanelDrag.oy) + "px";
+    });
+    document.addEventListener("mouseup", () => {
+        if (!activePanelDrag || !activePanelDrag.el) return;
+        delete activePanelDrag.el.dataset.dragging;
+        saveSinglePanelState(activePanelDrag.title, activePanelDrag.el);
+        activePanelDrag = null;
+    });
+}
+
+// ─── Bind system ─────────────────────────────────────────────
+function startBinding(e, module, setting) {
+    e.stopPropagation();
+    e.preventDefault();
+    bindingTarget = { module, setting };
+    // Force re-render to show "..." state
+    if (lastJson) updateGui(lastJson, true);
+}
+
+document.addEventListener('keydown', (e) => {
+    if (!bindingTarget) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    
+    const glfwKey = browserKeyToGlfw(e);
+    post({
+        action: 'setBind',
+        module: bindingTarget.module,
+        setting: bindingTarget.setting,
+        value: glfwKey
+    });
+    bindingTarget = null;
+    // Force re-render
+    if (lastJson) updateGui(lastJson, true);
+}, true); // Use capture phase to intercept before anything else
+
+// ─── Main UI update ──────────────────────────────────────────
+window.updateGui = (json, force) => {
+    if (!force && json === lastJson) return;
+    lastJson = json;
+    
+    let data;
+    try { data = JSON.parse(json); }
+    catch(ex) { console.error("updateGui parse error:", ex); return; }
+    
+    const cont = document.getElementById('container');
+    if (!cont) return;
+
+    data.forEach(p => {
+        if (p._type === 'windowSize') return;
+        if (p._type) return;
+
+        const savedState = loadPanelStateMap()[p.title];
+        const serverState = p.state || null;
+        const bootState = savedState || serverState;
+        let el = document.getElementById('panel-' + p.title);
+        
+        if (!el) {
+            el = document.createElement('div'); el.id = 'panel-' + p.title; el.className = 'panel';
+            el.innerHTML = `<div class="header">${p.title}</div><div class="modules-container"><div class="modules"></div></div>`;
+            const saved = bootState;
+            el.style.left = saved?.left ?? (typeof saved?.x === 'number' ? `${saved.x}px` : (p.x + 'px'));
+            el.style.top = saved?.top ?? (typeof saved?.y === 'number' ? `${saved.y}px` : (p.y + 'px'));
+            if (saved?.width) el.style.width = saved.width;
+            el.style.height = '';
+            cont.appendChild(el);
+
+            const header = el.querySelector('.header');
+            const modulesContainer = el.querySelector('.modules-container');
+            header.addEventListener('contextmenu', (evt) => {
+                evt.preventDefault();
+                modulesContainer.classList.toggle('closed');
+                saveSinglePanelState(p.title, el);
+            });
+            if (saved?.closed) modulesContainer.classList.add('closed');
+            
+            ensureGlobalDragHandlers();
+            header.onmousedown = e => {
+                if (e.button !== 0) return;
+                el.dataset.dragging = "1";
+                activePanelDrag = { el, title: p.title, ox: e.clientX - el.offsetLeft, oy: e.clientY - el.offsetTop };
+            };
+            if (window.ResizeObserver) {
+                const ro = new ResizeObserver(() => saveSinglePanelState(p.title, el));
+                ro.observe(el);
+            }
+        }
+        el.style.height = '';
+
+        const modCont = el.querySelector('.modules');
+        p.modules.forEach(m => {
+            let mEl = document.getElementById(`mod-${p.title}-${m.name}`);
+            if (!mEl) {
+                mEl = document.createElement('div');
+                mEl.id = `mod-${p.title}-${m.name}`;
+                mEl.className = 'module-wrap';
+                modCont.appendChild(mEl);
+            }
+            
+            const activeClass = m.enabled ? 'active' : '';
+            
+            // Find the bind setting for this module
+            const bindSetting = (m.settings || []).find(s => s.type === 'bind');
+            const isBindingThis = bindingTarget?.module === m.name;
+            const bindKeyName = isBindingThis ? '...' : (bindSetting?.keyName || 'NONE');
+            
+            // Build settings HTML (exclude bind from settings panel — it's shown on the module row)
+            const settingsHtml = (m.settings || []).filter(s => s.type !== 'bind').map(s => {
+                if (s.type === "bool") return `<div class="setting-item" onclick="post({action:'setBool',module:'${m.name}',setting:'${s.name}',value:${!s.value}})" style="display:flex; justify-content:space-between; align-items:center;"><span>${s.name}</span><div class="toggle-mini ${s.value?'active':''}"></div></div>`;
+                if (s.type === "number") return `<div class="setting-item"><span>${s.name}</span> <span style="float:right; color:var(--accent)">${s.value.toFixed(1)}</span><input type="range" min="${s.min}" max="${s.max}" step="0.1" value="${s.value}" onchange="post({action:'setNumber',module:'${m.name}',setting:'${s.name}',value:parseFloat(this.value)})" oninput="this.previousElementSibling.innerText=parseFloat(this.value).toFixed(1)"></div>`;
+                if (s.type === "mode") return `<div class="setting-item"><span>${s.name}</span><div class="mode-selector">${s.options.map(o => `<div class="mode-btn ${o===s.value?'active':''}" onclick="post({action:'setMode',module:'${m.name}',setting:'${s.name}',value:'${o}'})">${o}</div>`).join('')}</div></div>`;
+                if (s.type === "color") {
+                    const modeSetting = m.settings.find(st => st.name === "Mode");
+                    if (modeSetting && modeSetting.value !== "Static") return '';
+                    const hex = `#${s.value.toString(16).padStart(6,'0')}`;
+                    return `<div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; padding: 4px 24px;"><span>${s.name}</span><div class="color-preview" style="width:14px; height:14px; border-radius:50%; background:${hex}; border:1px solid rgba(255,255,255,0.3); cursor:pointer;" onclick="openPicker(event, '${m.name}', '${s.name}', '${hex}')"></div></div>`;
+                }
+                return '';
+            }).join('');
+
+            const persistedOpenInfo = getModuleOpenStateInfo(p.title, m.name);
+            const serverOpen = !!(serverState?.moduleOpen && serverState.moduleOpen[m.name] === true);
+            const runtimeOpen = mEl.querySelector('.settings-container')?.classList.contains('open') || false;
+            const isOpen = persistedOpenInfo.has ? persistedOpenInfo.value : (runtimeOpen || serverOpen);
+
+            const nextMarkup = `
+                <div class="module ${activeClass}" onclick="post({action:'toggle',module:'${m.name}'})"
+                     oncontextmenu="event.preventDefault(); toggleModuleSettings('${p.title}', '${m.name}', this)">
+                    <span>${m.name}</span>
+                    <div class="module-controls">
+                        <div class="module-bind ${isBindingThis?'binding':''}" 
+                             onclick="event.stopPropagation(); startBinding(event, '${m.name}', 'Bind')">
+                            ${bindKeyName}
+                        </div>
+                    </div>
+                </div>
+                <div class="settings-container ${isOpen ? 'open' : ''}">
+                    <div class="settings">${settingsHtml}</div>
+                </div>
+            `;
+            if (mEl.dataset.markup !== nextMarkup) {
+                mEl.innerHTML = nextMarkup;
+                mEl.dataset.markup = nextMarkup;
+            }
+        });
+    });
+};
+
+// ─── Color picker ────────────────────────────────────────────
+let pickingModule = null, pickingSetting = null, h = 0, s = 0.8, v = 1, isDraggingHue = false, isDraggingSV = false;
+function openPicker(e, m, sSet, hex) {
+    e.stopPropagation(); pickingModule = m; pickingSetting = sSet;
+    const p = document.getElementById('custom-picker');
+    p.style.display = 'block'; p.style.left = Math.min(window.innerWidth - 220, e.clientX) + 'px'; p.style.top = Math.min(window.innerHeight - 200, e.clientY + 20) + 'px';
+    updatePickerVisuals();
+}
+function handleHue(e) { const r = document.getElementById('hue-bar').getBoundingClientRect(); h = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); applyColor(); }
+function handleSV(e) { const r = document.getElementById('sv-area').getBoundingClientRect(); s = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)); v = Math.max(0, Math.min(1, 1 - (e.clientY - r.top) / r.height)); applyColor(); }
+window.addEventListener('mousemove', (e) => { if (isDraggingHue) handleHue(e); if (isDraggingSV) handleSV(e); if (isDraggingHue || isDraggingSV) updatePickerVisuals(); });
+window.addEventListener('mouseup', () => { isDraggingHue = isDraggingSV = false; });
+function applyColor() { const rgb = hsvToRgb(h, s, v); post({action:'setNumber', module: pickingModule, setting: pickingSetting, value: (rgb.r<<16)|(rgb.g<<8)|rgb.b}); }
+function updatePickerVisuals() {
+    document.getElementById('hue-thumb').style.left = (h * 100) + '%';
+    document.getElementById('sv-thumb').style.left = (s * 100) + '%';
+    document.getElementById('sv-thumb').style.top = ((1 - v) * 100) + '%';
+    document.getElementById('sv-area').style.background = `linear-gradient(to bottom, transparent, #000), linear-gradient(to right, #fff, hsl(${h*360}, 100%, 50%))`;
+}
+function hsvToRgb(h,s,v){let r,g,b,i=Math.floor(h*6),f=h*6-i,p=v*(1-s),q=v*(1-f*s),t=v*(1-(1-f)*s);switch(i%6){case 0:r=v,g=t,b=p;break;case 1:r=q,g=v,b=p;break;case 2:r=p,g=v,b=t;break;case 3:r=p,g=q,b=v;break;case 4:r=t,g=p,b=v;break;case 5:r=v,g=p,b=q;break;}return{r:Math.round(r*255),g:Math.round(g*255),b:Math.round(b*255)};}
+document.addEventListener('mousedown', e => { if(!e.target.closest('#custom-picker')) document.getElementById('custom-picker').style.display='none'; });
+</script>
+
+<div id="custom-picker" style="display:none; position:fixed; width:200px; padding:12px; background:rgba(15,20,30,0.95); border:1px solid rgba(255,255,255,0.1); border-radius:12px; backdrop-filter:blur(25px); z-index:10000; box-shadow:0 10px 40px rgba(0,0,0,0.7); user-select:none;">
+    <div id="sv-area" style="position:relative; width:100%; height:100px; background:linear-gradient(to bottom, transparent, #000), linear-gradient(to right, #fff, #f00); border-radius:6px; margin-bottom:12px; cursor:crosshair;" onmousedown="isDraggingSV=true; handleSV(event)">
+        <div id="sv-thumb" style="position:absolute; width:12px; height:12px; border:2px solid white; border-radius:50%; transform:translate(-50%, -50%); pointer-events:none; box-shadow:0 0 5px rgba(0,0,0,0.5);"></div>
+    </div>
+    <div id="hue-bar" style="position:relative; width:100%; height:12px; background:linear-gradient(to right, #f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00); border-radius:6px; cursor:crosshair;" onmousedown="isDraggingHue=true; handleHue(event)">
+        <div id="hue-thumb" style="position:absolute; top:50%; width:12px; height:12px; background:white; border-radius:50%; transform:translate(-50%, -50%); pointer-events:none; box-shadow:0 0 5px rgba(0,0,0,0.5); border:1px solid rgba(0,0,0,0.2);"></div>
+    </div>
+</div>
+</body>
+</html>

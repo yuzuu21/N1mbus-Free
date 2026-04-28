@@ -1,0 +1,18 @@
+{
+  "providers": [
+    {
+      "type": "ttf",
+      "file": "nimbus:rubik_medium.ttf",
+      "shift": [0.0, 0.0],
+      "size": 7.5,
+      "oversample": 4.0
+    },
+    {
+      "type": "ttf",
+      "file": "nimbus:zen_kaku_medium.ttf",
+      "shift": [0.0, 0.0],
+      "size": 7.5,
+      "oversample": 4.0
+    }
+  ]
+}

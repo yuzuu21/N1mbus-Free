@@ -1,0 +1,21 @@
+.gradle
+build/
+bin/
+run/
+.idea/
+*.iml
+*.iws
+.project
+.classpath
+.settings/
+out/
+gradle-app.setting
+.DS_Store
+*.swp
+*.bak
+*.log
+.tempmediaStorage/
+gradle.properties
+# gradle.properties may contain secrets, but here it's public. 
+# However, usually we don't ignore it in Fabric mods unless it has personal keys.
+# I will keep it for now as it has versioning.

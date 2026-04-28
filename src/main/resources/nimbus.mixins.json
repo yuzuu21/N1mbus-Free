@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "package": "n1mbus.ghs.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "logical.MinecraftMixin",
+    "logical.KeyboardMixin",
+    "logical.LocalPlayerMixin",
+    "logical.GuiMixin",
+    "logical.GuiGraphicsMixin",
+    "logical.LevelRendererMixin",
+    "logical.TitleScreenMixin",
+    "logical.WindowMixin",
+    "logical.EntityMixin",
+    "logical.ClientPacketListenerMixin"
+  ],
+  "mixins": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

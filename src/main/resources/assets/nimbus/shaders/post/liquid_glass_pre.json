@@ -1,0 +1,44 @@
+{
+  "targets": {
+    "n1mbusghs:blur_x":   { "persistent": true },
+    "n1mbusghs:blurred":  { "persistent": true },
+    "n1mbusghs:bloom":    { "persistent": true }
+  },
+  "passes": [
+    {
+      "vertex_shader": "n1mbusghs:core/blit_screen",
+      "fragment_shader": "n1mbusghs:program/blur",
+      "inputs": [
+        { "sampler_name": "Diffuse", "target": "minecraft:main", "bilinear": true }
+      ],
+      "output": "n1mbusghs:blur_x",
+      "uniforms": { "Config": [ { "type": "vec2", "value": [1.0, 0.0] } ] }
+    },
+    {
+      "vertex_shader": "n1mbusghs:core/blit_screen",
+      "fragment_shader": "n1mbusghs:program/blur",
+      "inputs": [
+        { "sampler_name": "Diffuse", "target": "n1mbusghs:blur_x", "bilinear": true }
+      ],
+      "output": "n1mbusghs:blurred",
+      "uniforms": { "Config": [ { "type": "vec2", "value": [0.0, 1.0] } ] }
+    },
+    {
+      "vertex_shader": "n1mbusghs:core/blit_screen",
+      "fragment_shader": "n1mbusghs:program/bloom",
+      "inputs": [
+        {
+          "sampler_name": "iChannel0",
+          "target": "minecraft:main",
+          "bilinear": true
+        },
+        {
+          "sampler_name": "iChannel1",
+          "target": "n1mbusghs:blurred",
+          "bilinear": true
+        }
+      ],
+      "output": "n1mbusghs:bloom"
+    }
+  ]
+}

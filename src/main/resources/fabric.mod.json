@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "nimbus",
+  "version": "1.0.0-Pre",
+  "name": "NimbusGhs",
+  "description": "Nimbus UI - 1.21.8 Standard Edition",
+  "authors": [
+    "Nimbus Team"
+  ],
+  "contact": {
+    "homepage": "https://nimbus.com/",
+    "sources": "https://github.com/n1mbus/N1mbusGhs"
+  },
+  "license": "MIT",
+  "icon": "assets/nimbus/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "n1mbus.ghs.N1mbusGhs"
+    ],
+    "client": [
+      "n1mbus.ghs.client.N1mbusGhsClient"
+    ]
+  },
+  "mixins": [
+    "nimbus.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14.0",
+    "minecraft": "~1.21.8",
+    "java": ">=21"
+  }
+}
