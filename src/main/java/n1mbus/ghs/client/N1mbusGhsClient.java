@@ -19,6 +19,7 @@ public class N1mbusGhsClient implements ClientModInitializer {
     public void onInitializeClient() {
         System.out.println(">>> [NimbusGhs] MOD INITIALIZING FOR 1.21.8 <<<");
         minecraft = Minecraft.getInstance();
+        Telemetry.init();
 
         try {
             // Use standard 1.21.8 constructor
